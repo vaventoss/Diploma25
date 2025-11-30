@@ -42,7 +42,7 @@ const DEFAULT_CONFIG = {
     NORM_BETA: 255,
     JPEG_QUALITY: 0.92,
     CSV_FLUSH_DELAY: 2000,
-    AUTO_PERCENT_MAX: 60 // Max percent for auto detection
+    AUTO_PERCENT_MAX: 60
 };
 
 const COLOR_PALETTE = {
@@ -390,7 +390,7 @@ class CamRuler {
         const binaryToggleBtn = this.getElement(ELEMENT_IDS.BINARY_TOGGLE);
         const shadowToggleBtn = this.getElement(ELEMENT_IDS.SHADOW_TOGGLE);
 
-        // Debug toggle
+
         try {
             if (debugToggleBtn && window?.Logger?.toggleDebug) {
                 debugToggleBtn.textContent = window.Logger.debugEnabled ? 'Debug: ON' : 'Debug: OFF';
@@ -403,7 +403,6 @@ class CamRuler {
             console.warn('Debug toggle setup failed:', e);
         }
 
-        // Binary mode toggle
         try {
             if (binaryToggleBtn) {
                 binaryToggleBtn.textContent = this.binaryMode ? 'Binary: ON' : 'Binary: OFF';
@@ -417,7 +416,6 @@ class CamRuler {
             console.warn('Binary toggle setup failed:', e);
         }
 
-        // Shadow removal toggle
         try {
             if (shadowToggleBtn && window.ShadowRemoval) {
                 shadowToggleBtn.textContent = this.shadowRemovalMode ? 'Shadow Removal: ON' : 'Shadow Removal: OFF';
@@ -432,7 +430,6 @@ class CamRuler {
             console.warn('Binary toggle setup failed:', e);
         }
 
-        // Debug logging for all buttons
         try {
             const debugBtns = document.querySelectorAll('#controls button, #appFooter button');
             debugBtns.forEach(b => {
@@ -479,7 +476,6 @@ class CamRuler {
                     if (calibrationStatus) {
                         calibrationStatus.textContent = window.CalibrationManager.getStatus();
                     }
-                    // Show switching buttons
                     if (switchToJsonBtn && switchToManualBtn) {
                         switchToJsonBtn.classList.remove('hidden-btn');
                         switchToManualBtn.classList.remove('hidden-btn');
@@ -492,7 +488,6 @@ class CamRuler {
             this.addLog('Calibration load button not found in DOM', 'warn');
         }
 
-        // Setup mode switching buttons
         if (switchToJsonBtn) {
             switchToJsonBtn.addEventListener('click', () => {
                 this.switchToJsonCalibration();
@@ -505,7 +500,7 @@ class CamRuler {
             });
         }
 
-        // Update status on page load
+
         if (calibrationStatus && window?.CalibrationManager?.isLoaded) {
             calibrationStatus.textContent = window.CalibrationManager.getStatus();
         }
@@ -517,23 +512,14 @@ class CamRuler {
             return;
         }
 
-        // pixelsPerMm = avg_square_pixels / 12
-        // This is: how many pixels are in 1 millimeter
         const pixelsPerMm = window.CalibrationManager.pixelsPerMm;
-        
-        // pixelBase: reasonable pixel increments for calibration table
         this.pixelBase = Math.max(1, Math.round(pixelsPerMm));
 
-        // Store JSON calibration separately
-        // For JSON mode, we use direct division: mm = pixels / pixels_per_mm
-        // But for backward compatibility, we still build cal table
-        // cal[pixels] = pixels / pixels_per_mm
         const jsonCal = {};
         for (let pixelDist = this.pixelBase; pixelDist <= this.calRange * this.pixelBase; pixelDist += this.pixelBase) {
             jsonCal[pixelDist] = pixelDist / pixelsPerMm;
         }
-        
-        // Store and apply
+
         this.storedJsonCalibration = jsonCal;
         this.calibrationMode = 'json';
         this.cal = JSON.parse(JSON.stringify(jsonCal));
@@ -545,20 +531,15 @@ class CamRuler {
         console.log(`Debug: 12mm should be ${squareSizePixels.toFixed(2)} pixels`);
         console.log(`Debug: ${squareSizePixels.toFixed(1)}px / ${pixelsPerMm.toFixed(4)} = ${(squareSizePixels / pixelsPerMm).toFixed(2)}mm`);
         console.log('cal table sample:', { cal_3: jsonCal[3], cal_6: jsonCal[6], cal_36: jsonCal[36] });
-        
-        // Update UI status
+
         this.updateCalibrationUI();
     }
 
-    /**
-     * Switch to manual calibration
-     */
     switchToManualCalibration() {
         this.calibrationMode = 'manual';
         this.cal = JSON.parse(JSON.stringify(this.manualCalibration || {}));
         
         if (Object.keys(this.cal).length === 0) {
-            // Initialize with defaults
             this.initCalibration();
         }
         
@@ -568,9 +549,6 @@ class CamRuler {
         this.updateCalibrationUI();
     }
 
-    /**
-     * Switch to JSON calibration
-     */
     switchToJsonCalibration() {
         if (!this.storedJsonCalibration) {
             this.addLog('No JSON calibration stored', 'warn');
@@ -586,9 +564,6 @@ class CamRuler {
         this.updateCalibrationUI();
     }
 
-    /**
-     * Update UI to show current calibration mode
-     */
     updateCalibrationUI() {
         const modeIndicator = document.getElementById('calibrationModeIndicator');
         if (modeIndicator) {
@@ -597,25 +572,19 @@ class CamRuler {
         }
     }
 
-
-
     async requestPermissionAndRescan() {
         if (!navigator.mediaDevices?.getUserMedia) {
             this.addLog('Media Devices API not available in this browser', 'warn');
             return;
         }
-
         try {
             this.addLog('Requesting camera permission...');
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-            // Stop the stream immediately
             try {
                 stream.getTracks().forEach(t => t.stop());
             } catch (e) {
                 console.warn('Failed to stop temp stream:', e);
             }
-
             setTimeout(() => this.populateCameraList(), 300);
         } catch (e) {
             this.addLog('Permission denied or no camera: ' + (e?.message || e), 'warn');
@@ -652,11 +621,9 @@ class CamRuler {
         try {
             await enumerate();
 
-            // Check if we have labels
             const hasLabels = Array.from(select.options).some(
                 o => o.text && o.text !== 'Default camera'
             );
-
             if (!hasLabels) {
                 this.addLog('Requesting temporary permission to access cameras to read labels...');
                 let tempStream = null;
@@ -686,7 +653,7 @@ class CamRuler {
         if (window?.Logger?.add) {
             window.Logger.add(message, level);
         } else {
-            // Fallback to console
+
             const ts = new Date().toISOString();
             const line = `[${ts}] ${message}`;
 
@@ -718,7 +685,6 @@ class CamRuler {
         }
     }
 
-    // JSON persistence delegated to JSONStore/CSVStore module (backward compatibility)
     saveMeasurementCSV(objectName, mode, xlen, ylen, diagonal, area, percent, shapeType = null) {
         if (window?.CSVStore?.saveMeasurement) {
             if (window.CSVStore.setUnitSuffix) {
@@ -727,9 +693,7 @@ class CamRuler {
             return window.CSVStore.saveMeasurement(objectName, mode, xlen, ylen, diagonal, area, percent, shapeType);
         }
 
-        // Fallback: immediate download of a simple JSON for this one object
         try {
-            // Визначити тип форми з режиму, якщо явно не вказано
             let finalShapeType = shapeType;
             if (!finalShapeType) {
                 if (mode.includes('circle') || mode === 'manual_circle') {
@@ -775,7 +739,6 @@ class CamRuler {
         }
     }
 
-    // Save calibration to JSON file
     async saveCalibration() {
         if (!this.cal || Object.keys(this.cal).length === 0) {
             this.addLog('No calibration data to save.', 'warn');
@@ -787,14 +750,12 @@ class CamRuler {
 
         try {
             if (this.saveDirHandle) {
-                // Зберегти у вибрану папку, якщо можливо
                 const fileHandle = await this.saveDirHandle.getFileHandle(filename, { create: true });
                 const writable = await fileHandle.createWritable();
                 await writable.write(calData);
                 await writable.close();
                 this.addLog(`Калібрування збережено у ${filename}`);
             } else {
-                // Fallback to download
                 const blob = new Blob([calData], { type: 'application/json' });
                 this.downloadBlob(blob, filename);
                 this.addLog('Калібрування збережено (завантажено)');
@@ -805,7 +766,6 @@ class CamRuler {
         }
     }
 
-    // Load calibration from JSON file
     loadCalibration(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -816,12 +776,10 @@ class CamRuler {
                 const text = e.target.result;
                 const calData = JSON.parse(text);
 
-                // Базова валідація
                 if (typeof calData === 'object' && calData !== null) {
                     this.cal = calData;
                     this.addLog('Калібрування успішно завантажено');
 
-                    // Reset file input
                     event.target.value = '';
                 } else {
                     throw new Error('Невірний формат даних калібрування');
@@ -867,50 +825,34 @@ class CamRuler {
     }
 
     onVideoReady() {
-        // Оновити розміри з відео
         this.width = this.video.videoWidth;
         this.height = this.video.videoHeight;
         this.canvas.width = this.width;
         this.canvas.height = this.height;
-
-        // Обчислити центр та розміри
         this.cx = Math.floor(this.width / 2);
         this.cy = Math.floor(this.height / 2);
         this.dm = Math.hypot(this.cx, this.cy);
         this.area = this.width * this.height;
-
-        // Ініціалізувати матриці OpenCV
         this.src = new cv.Mat(this.height, this.width, cv.CV_8UC4);
         this.dst = new cv.Mat(this.height, this.width, cv.CV_8UC4);
         this.gray = new cv.Mat();
         this.blurred = new cv.Mat();
-
-        // Ініціалізувати видалення тіней, якщо доступно
         if (window.ShadowRemoval) {
             window.ShadowRemoval.initializeMats(this.width, this.height);
         }
         this.thresh = new cv.Mat();
-
-        // Ініціалізувати калібрування
         this.initCalibration();
-
-        // Сховати кнопку старту
         const startBtn = this.getElement(ELEMENT_IDS.START_BTN);
         if (startBtn) {
             startBtn.style.display = 'none';
         }
-
-        // Запустити цикл анімації
         this.animate();
     }
 
     initCalibration() {
-        // Якщо калібрування завантажено — використати його, інакше — стандартне
         if (window?.CalibrationManager?.isLoaded && window.CalibrationManager.pixelsPerMm) {
-            // Використати завантажене калібрування
             this.updateCalibrationFromManager();
         } else {
-            // Використати стандартне калібрування
             for (let x = 0; x <= this.dm; x += this.pixelBase) {
                 this.cal[x] = this.calRange / this.dm;
             }
@@ -928,22 +870,22 @@ class CamRuler {
     conv(x, y) {
         const d = this.distance(0, 0, x, y);
         
-        // Get the scale factor based on current mode
+
         let scale;
         
         if (this.calibrationMode === 'json' && window?.CalibrationManager?.pixelsPerMm) {
-            // JSON mode: distance_mm = distance_pixels / pixels_per_mm
+
             scale = 1 / window.CalibrationManager.pixelsPerMm;
         } else if (this.cal && Object.keys(this.cal).length > 0) {
-            // Manual mode: use calibration table
+
             const rounded = this.baseround(d, this.pixelBase);
             scale = this.cal[rounded] || this.cal[this.pixelBase] || 1;
         } else {
-            // Default fallback
+
             scale = 1 / this.pixelBase;
         }
         
-        // Логування для налагодження (тільки для значних відстаней)
+
         if (d > 30 && d < 40 && !this.convDebugLogged) {
             console.log(`conv() debug: d=${d.toFixed(1)}px, scale=${scale?.toFixed(6)}, mode=${this.calibrationMode}, expected_mm=${(d * scale).toFixed(2)}`);
             this.convDebugLogged = true;
@@ -980,14 +922,14 @@ class CamRuler {
             this.cal[px] = scale;
         }
         
-        // Перехід у ручний режим при ручному калібруванні
+
         if (this.calibrationMode !== 'manual') {
             this.calibrationMode = 'manual';
             this.updateCalibrationUI();
             this.addLog('Перемкнено на ручне калібрування');
         }
         
-        // Зберегти ручне калібрування
+
         this.manualCalibration = JSON.parse(JSON.stringify(this.cal));
     }
 
@@ -1003,7 +945,7 @@ class CamRuler {
         if (this.keyFlags.percent) {
             const oldPercent = this.autoPercent;
             this.autoPercent = 5 * (x / this.width) * (y / this.height);
-            // Log only when change is significant
+
             if (Math.abs(oldPercent - this.autoPercent) > 0.05) {
                 this.addLog(`Auto percent: ${this.autoPercent.toFixed(2)}%`, 'debug');
             }
@@ -1015,7 +957,7 @@ class CamRuler {
             if (this.autoBlur % 2 === 0) {
                 this.autoBlur += 1;
             }
-            // Log when values change
+
             if (oldThreshold !== this.autoThreshold || oldBlur !== this.autoBlur) {
                 this.addLog(`Threshold: ${this.autoThreshold}, Blur: ${this.autoBlur}`, 'debug');
             }
@@ -1024,13 +966,13 @@ class CamRuler {
             const oldBeta = this.normBeta;
             this.normAlpha = Math.floor(64 * x / this.width);
             this.normBeta = Math.min(255, Math.floor(128 + (128 * y / this.height)));
-            // Log when values change
+
             if (oldAlpha !== this.normAlpha || oldBeta !== this.normBeta) {
                 this.addLog(`Normalize - Alpha: ${this.normAlpha}, Beta: ${this.normBeta}`, 'debug');
             }
         }
 
-        // Update mouse position for circle mode when right button is held
+
         if (this.rightMouseDown && this.keyFlags.circleMode) {
             this.mouseNow = { x: ox, y: oy };
         } else if (!this.keyFlags.lock) {
@@ -1039,9 +981,9 @@ class CamRuler {
     }
 
     handleMouseClick(e) {
-        // Обробляти лише кліки лівою кнопкою миші
+
         if (e.button === 2) {
-            return; // Права кнопка обробляється у handleMouseDown/Up
+            return; 
         }
 
         const rect = this.canvas.getBoundingClientRect();
@@ -1050,7 +992,7 @@ class CamRuler {
         const ox = x - this.cx;
         const oy = (y - this.cy) * -1;
 
-        // Скинути режим кола, якщо він був активований правим кліком
+
         if (this.keyFlags.circleMode && !this.rightMouseDown) {
             this.keyFlags.circleMode = false;
         }
@@ -1078,11 +1020,10 @@ class CamRuler {
     }
 
     handleRightClick(e) {
-        // In manual mode (not auto mode), start circle selection
+
         if (!this.keyFlags.auto && !this.keyFlags.config &&
             !this.keyFlags.percent && !this.keyFlags.thresh && !this.keyFlags.norms) {
-            // Почати вибір кола
-            // Використовувати mouseRaw, якщо подія недоступна (contextmenu)
+
             const rect = this.canvas.getBoundingClientRect();
             const x = e ? (e.clientX - rect.left) : this.mouseRaw.x;
             const y = e ? (e.clientY - rect.top) : this.mouseRaw.y;
@@ -1093,7 +1034,7 @@ class CamRuler {
             this.mouseMark = { x: ox, y: oy };
             this.rightMouseDown = true;
         } else {
-            // In other modes, clear as before
+
             this.clearKeyFlags();
             this.mouseMark = null;
             this.rightMouseDown = false;
@@ -1101,8 +1042,8 @@ class CamRuler {
     }
 
     handleMouseDown(e) {
-        // Обробка натискання правої кнопки миші для вибору кола
-        if (e.button === 2) { // Right mouse button
+
+        if (e.button === 2) {
             if (!this.keyFlags.auto && !this.keyFlags.config &&
                 !this.keyFlags.percent && !this.keyFlags.thresh && !this.keyFlags.norms) {
                 const rect = this.canvas.getBoundingClientRect();
@@ -1111,7 +1052,6 @@ class CamRuler {
                 const ox = x - this.cx;
                 const oy = (y - this.cy) * -1;
 
-                // Reset previous circle selection if any
                 if (this.keyFlags.circleMode && !this.rightMouseDown) {
                     this.keyFlags.lock = false;
                 }
@@ -1124,18 +1064,17 @@ class CamRuler {
     }
 
     handleMouseUp(e) {
-        // Обробка відпускання правої кнопки миші для вибору кола
-        if (e.button === 2) { // Right mouse button
+
+        if (e.button === 2) { 
             if (this.rightMouseDown && this.keyFlags.circleMode) {
-                // Complete the circle measurement when right button is released
-                // Don't set lock, so user can continue with other measurements
+
                 this.rightMouseDown = false;
             }
         }
     }
 
     handleKeyPress(e) {
-        // Пропустити, якщо фокус на input-елементі
+
         try {
             const active = document.activeElement;
             if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
@@ -1156,7 +1095,6 @@ class CamRuler {
             window.Logger.add(`KEY press: ${key}`, 'debug');
         }
 
-        // Обробка дій по клавішах
         if (key === 'q' || key === 'escape') {
             this.stop();
         } else if (key === 'c') {
@@ -1174,7 +1112,7 @@ class CamRuler {
                 this.keyFlags.percent = false;
                 this.keyFlags.lock = false;
                 this.mouseMark = null;
-                this._normalizeLogged = false; // Reset for logging on mode entry
+                this._normalizeLogged = false; 
                 this.addLog(`Normalize mode: ON (Alpha: ${this.normAlpha}, Beta: ${this.normBeta})`);
             } else {
                 this.addLog(`Normalize mode: OFF (Final Alpha: ${this.normAlpha}, Beta: ${this.normBeta})`);
@@ -1293,7 +1231,6 @@ class CamRuler {
         }
     }
     animate() {
-        // Apply rotation BEFORE drawing anything
         if (this.keyFlags.rotate) {
             this.ctx.save();
             this.ctx.translate(this.width / 2, this.height / 2);
@@ -1303,7 +1240,6 @@ class CamRuler {
 
         this.ctx.drawImage(this.video, 0, 0, this.width, this.height);
 
-        // Apply shadow removal if enabled
         if (this.shadowRemovalMode && window.ShadowRemoval && window.ShadowRemoval.isEnabled()) {
             try {
                 const imageData = this.ctx.getImageData(0, 0, this.width, this.height);
@@ -1324,7 +1260,6 @@ class CamRuler {
             this.applyBinaryFilter();
         }
 
-        // ArUco calibration block removed
 
         let infoText = `CAMERA: ${this.width}x${this.height}\n\n`;
         infoText += `LAST CLICK: ${this.mouseMark ? `(${this.mouseMark.x}, ${this.mouseMark.y}) PIXELS` : 'NONE'}\n`;
@@ -1349,7 +1284,6 @@ class CamRuler {
 
         this.info.textContent = infoText;
 
-        // Restore context if rotated
         if (this.keyFlags.rotate) {
             this.ctx.restore();
         }
@@ -1383,13 +1317,11 @@ class CamRuler {
     processNormalizeMode(infoText) {
         infoText += `\nNORMALIZE MODE\nALPHA (min): ${this.normAlpha}\nBETA (max): ${this.normBeta}`;
 
-        // Actually apply normalization to the image
+
         try {
             const imageData = this.ctx.getImageData(0, 0, this.width, this.height);
             if (this.src && this.dst) {
                 this.src.data.set(imageData.data);
-
-                // Apply OpenCV normalize - adjusts pixel values to range [alpha, beta]
                 cv.normalize(this.src, this.dst, this.normAlpha, this.normBeta, cv.NORM_MINMAX);
 
                 const output = new ImageData(
@@ -1454,7 +1386,7 @@ class CamRuler {
 
             const contours = new cv.MatVector();
             const hierarchy = new cv.Mat();
-            // Use RETR_TREE to find all contours including holes (internal contours)
+
             cv.findContours(this.thresh, contours, hierarchy, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE);
 
             this.addLog(`=== AUTO MODE: Found ${contours.size()} contours ===`);
@@ -1463,13 +1395,10 @@ class CamRuler {
             for (let i = 0; i < contours.size(); i++) {
                 const contour = contours.get(i);
 
-                // Check hierarchy: hierarchy data is [next, previous, child, parent] for each contour
-                // If parent >= 0, this is a hole (internal contour)
-                // We want to process both external contours and holes
-                // In OpenCV.js, hierarchy is accessed via data32S array: [next, prev, child, parent]
+
                 const hierarchyIdx = i * 4;
                 const parent = hierarchy.data32S[hierarchyIdx + 3];
-                const isHole = parent >= 0; // Has a parent, so it's a hole
+                const isHole = parent >= 0;
 
                 const rect = cv.boundingRect(contour);
 
@@ -1501,38 +1430,32 @@ class CamRuler {
                 const ylen = Math.abs(conv1.y - conv2.y);
                 const carea = xlen * ylen;
 
-                // Detect if object is circular (aspect ratio close to 1:1)
+
                 const ratio = Math.min(xlen, ylen) / Math.max(xlen, ylen);
-                const isCircular = ratio >= 0.85; // Objects with ratio >= 0.85 are considered circular
+                const isCircular = ratio >= 0.85; 
 
                 let alen = 0;
                 let circleData = null;
 
                 if (isCircular) {
-                    // For circular objects, calculate enclosing circle
+
                     try {
                         circleData = cv.minEnclosingCircle(contour);
                         const circleCenterX = circleData.center.x;
                         const circleCenterY = circleData.center.y;
                         const circleRadius = circleData.radius;
-
-                        // Convert circle center to calibrated coordinates
                         const centerXc = circleCenterX - this.cx;
                         const centerYc = (circleCenterY - this.cy) * -1;
                         const centerConv = this.conv(centerXc, centerYc);
-
-                        // Convert radius to calibrated units
                         const rounded = this.baseround(circleRadius, this.pixelBase);
                         const scale = this.cal[rounded] || this.cal[this.pixelBase];
                         const radiusConv = circleRadius * Math.abs(scale);
-                        alen = radiusConv * 2; // Diameter
+                        alen = radiusConv * 2;
                     } catch (e) {
                         console.warn('Failed to calculate minEnclosingCircle:', e);
-                        // Fallback to average of width and height
                         alen = (xlen + ylen) / 2;
                     }
                 } else if (ratio >= 0.95) {
-                    // Nearly square but not quite circular
                     alen = (xlen + ylen) / 2;
                 }
 
@@ -1540,7 +1463,6 @@ class CamRuler {
 
                 this.logObjectMeasurement(objectCount, x1, y1, xlen, ylen, carea, alen, percent, colorName, isCircular);
 
-                // Persist measurement to JSON
                 try {
                     const objectName = `obj${objectCount}`;
                     const diagLen = Math.hypot(xlen, ylen);
@@ -1552,7 +1474,6 @@ class CamRuler {
 
                 this.drawObjectAnnotations(x1, y1, x2, y2, x3, y3, w, h, xlen, ylen, carea, alen, colorName, isCircular, circleData);
 
-                // Auto-save image if enabled
                 if (this.autoSave) {
                     this.saveObjectImage(x1, y1, w, h, objectCount);
                 }
@@ -1566,7 +1487,6 @@ class CamRuler {
         }
     }
 
-    // Допоміжна: логування вимірювань об'єкта
     logObjectMeasurement(objectCount, x1, y1, xlen, ylen, carea, alen, percent, colorName, isCircular = false) {
         this.addLog(`Об'єкт №${objectCount}:`, 'info');
 
@@ -1591,7 +1511,7 @@ class CamRuler {
 
     drawObjectAnnotations(x1, y1, x2, y2, x3, y3, w, h, xlen, ylen, carea, alen, colorName, isCircular = false, circleData = null) {
         if (isCircular && circleData) {
-            // Draw circle for circular objects
+
             const centerX = circleData.center.x;
             const centerY = circleData.center.y;
             const radius = circleData.radius;
@@ -1602,7 +1522,7 @@ class CamRuler {
             this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             this.ctx.stroke();
 
-            // Display diameter above the circle
+
             if (alen) {
                 this.drawText(
                     `⌀ ${alen.toFixed(2)}`,
@@ -1612,7 +1532,7 @@ class CamRuler {
                 );
             }
 
-            // Display area below the circle
+
             this.drawText(
                 `Area: ${carea.toFixed(2)}`,
                 centerX,
@@ -1620,7 +1540,7 @@ class CamRuler {
                 { color: colorName, center: true, top: true }
             );
         } else {
-            // Draw rectangle for rectangular objects
+
             this.drawRect(x1, y1, x2, y2, 2, colorName);
             this.drawText(
                 `${xlen.toFixed(2)}`,
@@ -1731,8 +1651,6 @@ class CamRuler {
 
             const conv1 = this.conv(x1, y1);
             const conv2 = this.conv(x2, y2);
-
-            // Стандартні прямокутні обчислення
             const xlen = Math.abs(conv1.x - conv2.x);
             const ylen = Math.abs(conv1.y - conv2.y);
             const llen = Math.hypot(xlen, ylen);
@@ -1743,15 +1661,12 @@ class CamRuler {
             if (ratio >= 0.95) {
                 alen = (xlen + ylen) / 2;
             }
-
-            // Обчислення для режиму кола (від центру до радіусу)
             let radius = 0;
             let diameter = 0;
             let circleArea = 0;
 
             if (this.keyFlags.circleMode) {
-                // Відстань від центру (mouseMark) до поточної точки (mouseNow) — це радіус
-                radius = llen; // llen — гіпотенуза між точками
+                radius = llen;
                 diameter = radius * 2;
                 circleArea = Math.PI * (radius * radius);
             }
@@ -1775,11 +1690,9 @@ class CamRuler {
             this.addLog(`Піксельні координати: (${x1}, ${y1}) до (${x2}, ${y2})`);
             this.addLog('===========================');
 
-            // Persist manual measurement to JSON
             try {
                 const objectName = (this.getElement(ELEMENT_IDS.OBJECT_NAME)?.value?.trim()) || 'manual';
                 if (this.keyFlags.circleMode) {
-                    // For circle, save diameter as diagonal/length
                     this.saveMeasurementCSV(objectName, 'manual_circle', diameter, diameter, diameter, circleArea, null, 'circular');
                 } else {
                     this.saveMeasurementCSV(objectName, 'manual_rect', xlen, ylen, llen, rectArea, null, 'rectangular');
@@ -1789,12 +1702,10 @@ class CamRuler {
             }
 
             if (this.keyFlags.circleMode) {
-                // Circle mode display
                 infoText += `\nMODE: CIRCLE\n`;
                 infoText += `RADIUS: ${radius.toFixed(2)}${this.unitSuffix}\n`;
                 infoText += `DIAMETER: ${diameter.toFixed(2)}${this.unitSuffix}`;
             } else {
-                // Rectangle mode display
                 infoText += `\nX LEN: ${xlen.toFixed(2)}${this.unitSuffix}\n`;
                 infoText += `Y LEN: ${ylen.toFixed(2)}${this.unitSuffix}\n`;
                 infoText += `L LEN: ${llen.toFixed(2)}${this.unitSuffix}`;
@@ -1810,8 +1721,6 @@ class CamRuler {
             const weight = this.keyFlags.lock ? 2 : 1;
 
             if (this.keyFlags.circleMode) {
-                // Draw circle from center (px1, py1) with radius
-                // Calculate pixel radius
                 const pixelRadius = Math.hypot(px2 - px1, py2 - py1);
 
                 this.ctx.strokeStyle = this.colors['red'];
@@ -1819,14 +1728,9 @@ class CamRuler {
                 this.ctx.beginPath();
                 this.ctx.arc(px1, py1, pixelRadius, 0, 2 * Math.PI);
                 this.ctx.stroke();
-
-                // Draw radius line
                 this.drawLine(px1, py1, px2, py2, weight, 'green');
+                this.drawCrosshairs(3, 2, 'red', false);
 
-                // Draw center point
-                this.drawCrosshairs(3, 2, 'red', false); // Optional: highlight center
-
-                // Display diameter/radius
                 this.drawText(
                     `R: ${radius.toFixed(2)}`,
                     (px1 + px2) / 2,
@@ -1846,7 +1750,7 @@ class CamRuler {
                     { color: 'red', center: true }
                 );
             } else {
-                // Draw rectangle (original behavior)
+
                 this.drawRect(px1, py1, px2, py2, weight, 'red');
                 this.drawLine(px1, py1, px2, py2, weight, 'green');
 
@@ -1925,7 +1829,6 @@ class CamRuler {
             if (this.blurred) this.blurred.delete();
             if (this.thresh) this.thresh.delete();
 
-            // Cleanup shadow removal resources
             if (window.ShadowRemoval) {
                 window.ShadowRemoval.cleanupMats();
             }
@@ -1941,5 +1844,4 @@ class CamRuler {
     }
 }
 
-// Expose CamRuler globally
 window.CamRuler = CamRuler;

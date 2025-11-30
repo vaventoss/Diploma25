@@ -38,7 +38,6 @@
   <div class="detail-wrap">
     <h1>Informatsiya pro vymiryanyi obiekt</h1>
 
-    <!-- Controls section -->
     <div class="detail-controls">
       <div id="detailInfo" class="detail-info">
         Loading image...
@@ -52,7 +51,6 @@
       </div>
     </div>
 
-    <!-- Local file selection -->
     <div class="local-file-row">
       <label for="localFileSelect">Local files:</label>
       <select id="localFileSelect">
@@ -61,7 +59,6 @@
       <button id="localLoadBtn">Load Selected</button>
     </div>
 
-    <!-- Image processing results grid -->
     <div class="detail-grid">
       <div class="detail-block">
         <div>Original</div>
@@ -81,14 +78,12 @@
       </div>
     </div>
 
-    <!-- Histogram section -->
     <div class="detail-hist">
       <div>Histogram</div>
       <canvas id="histCanvas" width="512" height="200"></canvas>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="logger.js" defer></script>
   <script src="csvstore.js" defer></script>
   <script src="shadowremoval.js" defer></script>
@@ -96,7 +91,7 @@
   <script src="camruler.js" defer></script>
   <script src="gallery.js" defer></script>
   <script src="boot.js" defer></script>
-  <script async src="https://docs.opencv.org/4.5.2/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <script async src="https://docs.opencv.org/5.x/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       if (window.initGalleryDetailPage) {

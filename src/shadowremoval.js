@@ -1,12 +1,7 @@
 (function () {
     const SHADOW_CONFIG = {
-        
         CLAHE_CLIP_LIMIT: 3.0,
-        
-        
         CLAHE_TILE_SIZE: 8,
-        
-        
         BLUR_SIZE: 45
     };
 
@@ -59,9 +54,6 @@
             }
         }
 
-        /**
-         
-         */
         removeShadowsCLAHE(src, dst) {
             let rgb = null;
             let lab = null;
@@ -116,8 +108,7 @@
                         console.error('Fallback failed:', copyErr);
                     }
                 }
-                
-                // Вимкнути, якщо забагато помилок
+
                 if (this.errorCount > 10) {
                     console.error('Too many errors, disabling shadow removal');
                     this.enabled = false;
@@ -134,9 +125,6 @@
             }
         }
 
-        /**
-         * Резерв: гомоморфний фільтр
-         */
         removeShadowsHomomorphic(src, dst) {
             let rgb = null;
             let gray = null;
@@ -154,7 +142,6 @@
                 const ksize = new cv.Size(SHADOW_CONFIG.BLUR_SIZE, SHADOW_CONFIG.BLUR_SIZE);
                 cv.GaussianBlur(gray, blurred, ksize, 0);
 
-                // Normalize each channel
                 const channels = new cv.MatVector();
                 cv.split(rgb, channels);
 
@@ -168,7 +155,7 @@
                     channel.convertTo(channelFloat, cv.CV_32F, 1/255.0);
                     blurred.convertTo(blurredFloat, cv.CV_32F, 1/255.0);
                     
-                    cv.add(blurredFloat, new cv.Scalar(0.01), blurredFloat); // Avoid division by zero
+                    cv.add(blurredFloat, new cv.Scalar(0.01), blurredFloat);
                     cv.divide(channelFloat, blurredFloat, ratio);
                     ratio.convertTo(scaled, cv.CV_8U, 128, 0);
                     

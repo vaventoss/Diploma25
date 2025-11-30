@@ -84,8 +84,6 @@
                 }
 
                 const filename = DEFAULT_CONFIG.JSON_FILENAME;
-                
-                // Read existing file if it exists, otherwise start with empty array
                 let existingData = [];
                 if (this.saveDirHandle?.getFileHandle) {
                     try {
@@ -99,7 +97,6 @@
                             }
                         }
                     } catch (e) {
-                        // File doesn't exist or is invalid, start with empty array
                         existingData = [];
                     }
                 }
@@ -178,7 +175,6 @@
                     window.Logger.add('Starting export...', 'info');
                 }
 
-                // Flush any pending measurements first
                 if (this.jsonFlushTimer) {
                     clearTimeout(this.jsonFlushTimer);
                     this.jsonFlushTimer = null;
@@ -200,8 +196,7 @@
                     }
                     return;
                 }
-                
-                // Request directory if not already set
+
                 if (!this.saveDirHandle && window.showDirectoryPicker) {
                     try {
                         const chosen = await window.showDirectoryPicker();
@@ -225,7 +220,6 @@
                     }
                 }
 
-                // If we have a save directory, try to read existing file and merge
                 if (this.saveDirHandle?.getFileHandle) {
                     const filename = DEFAULT_CONFIG.JSON_FILENAME;
                     try {
@@ -245,10 +239,9 @@
                             }
                         }
                     } catch (e) {
-                        // File doesn't exist or is invalid, use only current measurements
+
                     }
 
-                    // Write merged data
                     if (allMeasurements.length > 0) {
                         const content = JSON.stringify(allMeasurements, null, 2);
                         try {
@@ -270,12 +263,10 @@
                                     'warn'
                                 );
                             }
-                            // Fall through to download fallback
                         }
                     }
                 }
 
-                // Fallback: download as file
                 if (allMeasurements.length > 0) {
                     const content = JSON.stringify(allMeasurements, null, 2);
                     this.downloadJSON(DEFAULT_CONFIG.JSON_FILENAME, content);
@@ -302,8 +293,7 @@
         }
     }
 
-    // Create instance and expose as both JSONStore and CSVStore (for backward compatibility)
     const store = new JSONStore();
     window.JSONStore = store;
-    window.CSVStore = store; // Keep CSVStore name for backward compatibility
+    window.CSVStore = store;
 })();

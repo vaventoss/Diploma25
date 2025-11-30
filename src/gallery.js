@@ -140,7 +140,6 @@ function performGalleryProcessing(img, targets) {
         const src = cv.imread(img);
         const gray = new cv.Mat();
 
-        // Convert to grayscale
         cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
         if (grayCanvas) {
             grayCanvas.width = gray.cols;
@@ -148,7 +147,6 @@ function performGalleryProcessing(img, targets) {
             cv.imshow(grayCanvas, gray);
         }
 
-        // Apply threshold
         const thresh = new cv.Mat();
         try {
             cv.threshold(gray, thresh, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU);
@@ -162,7 +160,6 @@ function performGalleryProcessing(img, targets) {
             cv.imshow(threshCanvas, thresh);
         }
 
-        // Invert threshold
         const inv = new cv.Mat();
         cv.bitwise_not(thresh, inv);
 
@@ -172,7 +169,6 @@ function performGalleryProcessing(img, targets) {
             cv.imshow(invCanvas, inv);
         }
 
-        // Create histogram
         if (histCanvas) {
             createHistogram(gray, histCanvas);
         }
@@ -181,7 +177,6 @@ function performGalleryProcessing(img, targets) {
             infoEl.textContent = `Processed: ${img.src}`;
         }
 
-        // Clean up
         src.delete();
         gray.delete();
         thresh.delete();
@@ -212,7 +207,6 @@ function createHistogram(grayMat, canvas) {
 
     hCtx.clearRect(0, 0, w, h);
 
-    // Find max value for scaling
     let max = 0;
     const histData = hist.data32F || hist.data32S || [];
     for (let i = 0; i < histData.length; i++) {
@@ -223,11 +217,9 @@ function createHistogram(grayMat, canvas) {
 
     const binW = w / (histData.length || 256);
 
-    // Draw background
     hCtx.fillStyle = HISTOGRAM_CONFIG.BACKGROUND_COLOR;
     hCtx.fillRect(0, 0, w, h);
 
-    // Draw histogram bars
     hCtx.fillStyle = HISTOGRAM_CONFIG.BAR_COLOR;
     for (let i = 0; i < histData.length; i++) {
         const val = histData[i];
@@ -235,13 +227,11 @@ function createHistogram(grayMat, canvas) {
         hCtx.fillRect(i * binW, h - scaled, Math.max(1, Math.ceil(binW)), scaled);
     }
 
-    // Clean up
     hist.delete();
     mask.delete();
     matVec.delete();
 }
 
-// Populate file select with image files from directory
 async function populateLocalFileSelect(dirHandle, selectEl) {
     if (!dirHandle || !selectEl) {
         return;
@@ -270,7 +260,6 @@ async function populateLocalFileSelect(dirHandle, selectEl) {
     }
 }
 
-// Load image from FileHandle (File System Access API)
 async function loadImageFromFileHandle(fileHandle, targets) {
     try {
         const file = await fileHandle.getFile();

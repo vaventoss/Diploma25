@@ -55,10 +55,8 @@ class CalibrationManager {
             this.pixelsPerMm = data.estimated_pixels_per_mm;
             console.log('Using estimated_pixels_per_mm from JSON:', this.pixelsPerMm);
         } else if (data.camera_matrix && Array.isArray(data.camera_matrix)) {
-            // Calculate from camera matrix (focal length)
             
-            this.focalLength = data.camera_matrix[0][0]; // fx
-            // Estimate pixels per mm from focal length and square size
+            this.focalLength = data.camera_matrix[0][0];
             
             this.pixelsPerMm = this.focalLength / (data.square_size_mm || 12);
             console.log('Calculated pixels per mm from camera_matrix:', this.pixelsPerMm);
