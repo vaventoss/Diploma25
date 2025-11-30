@@ -1,0 +1,10 @@
+timestamp;objectName;mode;shapeType;x_len;y_len;diagonal;area;percent;units
+2025-11-29T16:49:39.860Z;obj10;auto;circular;6.3;6.12;8.783;38.556;0.387;mm
+2025-11-29T16:49:40.512Z;obj10;auto;rectangular;5.58;3.96;6.842;22.097;0.222;mm
+2025-11-29T16:49:40.648Z;obj10;auto;circular;14.04;13.86;19.729;194.594;1.955;mm
+2025-11-29T16:49:41.408Z;obj10;auto;circular;14.04;14.04;19.856;197.122;1.98;mm
+2025-11-29T16:49:41.864Z;obj10;auto;circular;14.22;14.04;19.983;199.649;2.006;mm
+2025-11-29T16:49:42.195Z;obj10;auto;rectangular;8.46;3.24;9.059;27.41;0.275;mm
+2025-11-29T16:49:43.452Z;obj10;auto;circular;14.22;13.86;19.857;197.089;1.98;mm
+2025-11-29T16:49:43.642Z;obj10;auto;circular;14.22;14.04;19.983;199.649;2.006;mm
+2025-11-29T16:49:43.848Z;obj10;auto;rectangular;6.48;3.6;7.413;23.328;0.234;mm

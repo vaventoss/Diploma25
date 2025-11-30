@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informatsiya pro vymiryanyi obiekt</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .detail-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .detail-block {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    .detail-block canvas {
+      display: block;
+      max-width: 420px;
+      height: auto;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    #detailInfo {
+      color: #ccc;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="detail-wrap">
+    <h1>Informatsiya pro vymiryanyi obiekt</h1>
+
+    <!-- Controls section -->
+    <div class="detail-controls">
+      <div id="detailInfo" class="detail-info">
+        Loading image...
+      </div>
+      <div id="metaBlock" class="detail-info meta-block"></div>
+      <div class="detail-controls-right">
+        <button id="chooseLocalFolder">Choose Local Folder</button>
+        <span id="localFolderLabel" class="local-folder-label">
+          (no folder)
+        </span>
+      </div>
+    </div>
+
+    <!-- Local file selection -->
+    <div class="local-file-row">
+      <label for="localFileSelect">Local files:</label>
+      <select id="localFileSelect">
+        <option value="">(none)</option>
+      </select>
+      <button id="localLoadBtn">Load Selected</button>
+    </div>
+
+    <!-- Image processing results grid -->
+    <div class="detail-grid">
+      <div class="detail-block">
+        <div>Original</div>
+        <canvas id="origCanvas"></canvas>
+      </div>
+      <div class="detail-block">
+        <div>Grayscale</div>
+        <canvas id="grayCanvas"></canvas>
+      </div>
+      <div class="detail-block">
+        <div>Threshold</div>
+        <canvas id="threshCanvas"></canvas>
+      </div>
+      <div class="detail-block">
+        <div>Inverted Threshold</div>
+        <canvas id="invCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Histogram section -->
+    <div class="detail-hist">
+      <div>Histogram</div>
+      <canvas id="histCanvas" width="512" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="logger.js" defer></script>
+  <script src="csvstore.js" defer></script>
+  <script src="shadowremoval.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="camruler.js" defer></script>
+  <script src="gallery.js" defer></script>
+  <script src="boot.js" defer></script>
+  <script async src="https://docs.opencv.org/4.5.2/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.initGalleryDetailPage) {
+        window.initGalleryDetailPage();
+      }
+    });
+  </script>
+</body>
+
+</html>

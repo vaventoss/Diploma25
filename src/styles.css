@@ -1,0 +1,667 @@
+/* 
+   CSS Reset & Base Styles
+*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Consolas', monospace;
+    background: #1a1a1a;
+    color: #fff;
+    overflow: hidden;
+}
+
+/* 
+   Main Container
+*/
+#container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 
+   Video & Canvas
+  */
+#video {
+    display: none;
+}
+
+#canvas {
+    max-width: 100%;
+    max-height: 100%;
+    border: 2px solid #333;
+}
+
+/* 
+   Info Overlay
+  */
+#info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.6;
+    z-index: 10;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+/* 
+   Utility Classes
+  */
+.highlight {
+    color: #00ff00;
+}
+
+.error {
+    color: #ff0000;
+}
+
+/* 
+   Start Button & Controls
+  */
+#startBtn {
+    display: inline-block;
+    padding: 20px 40px;
+    font-size: 18px;
+    background: rgb(9, 255, 0);
+    color: violet;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#startBtn:hover {
+    background: #0056b3;
+}
+
+#startBtn:disabled {
+    background: #666;
+    cursor: wait;
+}
+
+.start-controls {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 100;
+}
+
+.start-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.start-controls #cameraSelect {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.start-controls #cameraRefresh,
+.start-controls button#cameraRequest {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.start-controls #cameraRefresh:hover,
+.start-controls button#cameraRequest:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* 
+   Loading Indicator
+  */
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 90;
+}
+
+#loading>div+div {
+    margin-top: 10px;
+}
+
+/* 
+   Control Panel
+  */
+.control-panel {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 110;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px;
+    border-radius: 6px;
+    align-items: center;
+}
+
+.control-panel button {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.control-panel button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.control-panel button.active {
+    background: #007bff;
+    border-color: #0056b3;
+}
+
+.control-panel button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 
+   Footer & Camera Controls
+  */
+#appFooter {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px;
+    z-index: 130;
+    max-height: 420px;
+    transition: max-height 220ms ease, opacity 200ms ease, padding 180ms ease;
+    overflow: hidden;
+}
+
+#appFooter.collapsed {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+}
+
+#appFooter .save-controls,
+#appFooter .footer-links,
+#appFooter .log-panel {
+    width: 100%;
+}
+
+.footer-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.footer-camera {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#appFooter #cameraSelect {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#appFooter .footer-camera button {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#appFooter .footer-camera button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* 
+   Save Controls
+  */
+.save-controls {
+    position: static;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 100;
+    color: #ccc;
+}
+
+.save-controls #chooseFolder {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-controls #saveFolderLabel {
+    margin-left: 8px;
+    color: #ccc;
+    font-size: 12px;
+}
+
+/* 
+   Calibration Controls
+  */
+.calibration-controls {
+    position: static;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 100;
+    color: #000000;
+}
+
+.calibration-controls label {
+    color: #ccc;
+    font-size: 14px;
+}
+
+.calibration-controls input[type="file"] {
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 120px;
+}
+
+.calibration-controls #calibrationLoadBtn {
+    background: rgba(255, 0, 0, 0.04);
+    color: #ff0000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.calibration-controls #calibrationLoadBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.calibration-controls .calibration-status {
+    color: #4a9eff;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* 
+   Log Panel
+  */
+.log-panel {
+    position: static;
+    width: 360px;
+    max-height: 40vh;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 12px;
+    z-index: 120;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.log-header .log-controls button {
+    margin-left: 6px;
+    padding: 3px 6px;
+    font-size: 12px;
+}
+
+.log-body {
+    padding: 8px;
+    overflow: auto;
+    max-height: calc(40vh - 36px);
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.log-line {
+    margin-bottom: 6px;
+}
+
+.log-level-info {
+    color: #c8c8c8;
+}
+
+.log-level-debug {
+    color: #88ff88;
+}
+
+.log-level-warn {
+    color: #ffcc66;
+}
+
+.log-level-error {
+    color: #ff6666;
+}
+
+/* 
+   Gallery Styles
+  */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 1100px;
+    margin: 6px auto;
+}
+
+.gallery-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.gallery-thumb {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    display: block;
+    background: #222;
+}
+
+.gallery-caption {
+    padding: 6px 8px;
+    font-size: 12px;
+    color: #ddd;
+    word-break: break-all;
+}
+
+.gallery-note {
+    margin-top: 12px;
+    color: #ccc;
+    font-size: 13px;
+    max-width: 1100px;
+}
+
+/* 
+   Gallery Detail Page
+  */
+.detail-wrap {
+    padding: 18px;
+}
+
+.detail-grid {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.detail-block {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.detail-block canvas {
+    display: block;
+    max-width: 420px;
+    height: auto;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.detail-hist {
+    margin-top: 18px;
+}
+
+.detail-back {
+    margin-top: 14px;
+}
+
+.detail-info {
+    color: #ccc;
+    margin-top: 8px;
+}
+
+.detail-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.detail-controls-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.local-folder-label {
+    color: #ccc;
+    font-size: 13px;
+}
+
+.local-file-row {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.meta-block {
+    margin-top: 6px;
+}
+
+/* 
+   Advanced Calibration Controls
+  */
+.calibration-controls {
+    background: #f5f5f5;
+}
+
+.calib-panel {
+    background: rgba(245, 245, 245, 0.95);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+}
+
+.calib-row label {
+    min-width: 120px;
+    font-size: 13px;
+}
+
+.calib-row input[type=number],
+.calib-row select {
+    flex: 1;
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    font-size: 13px;
+}
+
+.calib-row input[type=number]:focus,
+.calib-row select:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.calib-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.calib-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #666;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.calib-btn:hover:not(:disabled) {
+    background: #f0f0f0;
+}
+
+.calib-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calib-btn-secondary {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #999;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.calib-btn-secondary:hover {
+    background: #f0f0f0;
+}
+
+.link-btn {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #666;
+}
+
+.link-btn:hover {
+    background: #f0f0f0;
+}
+
+.calib-info {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+    padding: 10px;
+}
+
+.calib-info kbd {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+}
+
+.calib-status {
+    margin-top: 12px;
+    padding: 10px;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+    border: 1px solid #ccc;
+}
+
+.calib-status.success {
+    display: block;
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.calib-status.error {
+    display: block;
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.calib-status.info {
+    display: block;
+    background: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.calib-status.warning {
+    display: block;
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+/* Calibration mode indicator */
+#calibrationModeIndicator {
+    margin: 0 10px;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+/* Hidden class for toggle buttons */
+.hidden-btn {
+    display: none !important;
+}

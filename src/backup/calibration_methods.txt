@@ -1,0 +1,226 @@
+    // Setup Advanced Calibration Controls
+    setupCalibrationControls() {
+        const slider = this.getElement(ELEMENT_IDS.CALIB_MODE_SLIDER);
+        const indicator = this.getElement(ELEMENT_IDS.CALIB_MODE_INDICATOR);
+        const arucoPanel = this.getElement(ELEMENT_IDS.ARUCO_PANEL);
+        const chessPanel = this.getElement(ELEMENT_IDS.CHESS_PANEL);
+        const manualPanel = this.getElement(ELEMENT_IDS.MANUAL_PANEL);
+
+        // Slider change event
+        if (slider) {
+            slider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                const modes = ['manual', 'aruco', 'chessboard'];
+                const labels = ['Manual Calibration', 'ArUco Marker Calibration', 'Chessboard Calibration'];
+                
+                this.calibrationMode = modes[value];
+                if (indicator) indicator.textContent = labels[value];
+
+                // Show/hide panels
+                if (arucoPanel) arucoPanel.style.display = value === 1 ? 'block' : 'none';
+                if (chessPanel) chessPanel.style.display = value === 2 ? 'block' : 'none';
+                if (manualPanel) manualPanel.style.display = value === 0 ? 'block' : 'none';
+
+                this.addLog(`Calibration mode: ${this.calibrationMode}`, 'info');
+            });
+        }
+
+        // ArUco calibration button
+        const startArucoBtn = this.getElement(ELEMENT_IDS.START_ARUCO_CALIB);
+        if (startArucoBtn) {
+            startArucoBtn.addEventListener('click', () => this.startArucoCalibration());
+        }
+
+        // Chessboard calibration buttons
+        const startChessBtn = this.getElement(ELEMENT_IDS.START_CHESS_CALIB);
+        const computeChessBtn = this.getElement(ELEMENT_IDS.COMPUTE_CHESS_CALIB);
+        const clearChessBtn = this.getElement(ELEMENT_IDS.CLEAR_CHESS_IMAGES);
+
+        if (startChessBtn) {
+            startChessBtn.addEventListener('click', () => this.captureChessboardImage());
+        }
+        if (computeChessBtn) {
+            computeChessBtn.addEventListener('click', () => this.computeChessboardCalibration());
+        }
+        if (clearChessBtn) {
+            clearChessBtn.addEventListener('click', () => this.clearChessboardImages());
+        }
+    }
+
+    // Start ArUco marker calibration
+    startArucoCalibration() {
+        if (!this.calibrationManager) {
+            this.showCalibStatus('Calibration manager not initialized', 'error');
+            return;
+        }
+
+        this.isCalibrating = true;
+        this.showCalibStatus('Show ArUco marker to camera...', 'info');
+        this.addLog('ArUco calibration started - show marker to camera', 'info');
+    }
+
+    // Process ArUco calibration in animation loop
+    processArucoCalibration() {
+        if (!this.calibrationManager || !this.src) return;
+
+        try {
+            const detection = this.calibrationManager.detectArucoMarkers(this.src);
+            
+            if (detection && detection.count > 0) {
+                // Draw detected markers
+                this.calibrationManager.drawArucoMarkers(this.dst, detection.corners, detection.ids);
+                
+                // Get marker size from input
+                const markerSizeInput = this.getElement(ELEMENT_IDS.MARKER_SIZE);
+                const markerSize = markerSizeInput ? parseFloat(markerSizeInput.value) : 50;
+
+                // Calibrate
+                const result = this.calibrationManager.calibrateFromAruco(detection.corners, markerSize);
+                
+                if (result.success) {
+                    this.showCalibStatus(`✓ Calibrated: ${result.pixelsPerMM.toFixed(3)} px/mm`, 'success');
+                    this.addLog(`ArUco calibration successful: ${result.pixelsPerMM.toFixed(3)} px/mm`, 'info');
+                    this.isCalibrating = false;
+
+                    // Apply to legacy calibration system
+                    this.applyAdvancedCalibration();
+                }
+
+                // Cleanup
+                detection.corners.delete();
+                detection.ids.delete();
+            }
+        } catch (e) {
+            console.error('ArUco calibration error:', e);
+            this.showCalibStatus('Error: ' + e.message, 'error');
+            this.isCalibrating = false;
+        }
+    }
+
+    // Capture chessboard image
+    captureChessboardImage() {
+        if (!this.calibrationManager || !this.src) {
+            this.showCalibStatus('Camera not ready', 'error');
+            return;
+        }
+
+        try {
+            // Get pattern size
+            const patternInput = this.getElement(ELEMENT_IDS.CHESS_PATTERN_SIZE);
+            const patternStr = patternInput ? patternInput.value : '9x6';
+            const [width, height] = patternStr.split('x').map(Number);
+            const patternSize = { width: width - 1, height: height - 1 }; // Internal corners
+
+            // Detect chessboard
+            const gray = new cv.Mat();
+            cv.cvtColor(this.src, gray, cv.COLOR_RGBA2GRAY);
+            
+            const detection = this.calibrationManager.detectChessboard(gray, patternSize);
+            
+            if (detection && detection.found) {
+                // Draw corners
+                this.calibrationManager.drawChessboardCorners(this.dst, detection.corners, patternSize);
+                
+                // Add image to calibration set
+                const count = this.calibrationManager.addChessboardImage(gray, detection.corners);
+                
+                // Update UI
+                const countEl = this.getElement(ELEMENT_IDS.CHESS_IMAGE_COUNT);
+                if (countEl) countEl.textContent = count;
+                
+                const computeBtn = this.getElement(ELEMENT_IDS.COMPUTE_CHESS_CALIB);
+                if (computeBtn) computeBtn.disabled = count < 5;
+
+                this.showCalibStatus(`✓ Image ${count} captured`, 'success');
+                this.addLog(`Chessboard image ${count} captured`, 'info');
+                
+                detection.corners.delete();
+            } else {
+                this.showCalibStatus('Chessboard not found - adjust position', 'warning');
+            }
+            
+            gray.delete();
+        } catch (e) {
+            console.error('Chessboard capture error:', e);
+            this.showCalibStatus('Error: ' + e.message, 'error');
+        }
+    }
+
+    // Compute chessboard calibration
+    computeChessboardCalibration() {
+        if (!this.calibrationManager) {
+            this.showCalibStatus('Calibration manager not initialized', 'error');
+            return;
+        }
+
+        try {
+            // Get square size
+            const squareSizeInput = this.getElement(ELEMENT_IDS.CHESS_SQUARE_SIZE);
+            const squareSize = squareSizeInput ? parseFloat(squareSizeInput.value) : 25;
+            
+            this.calibrationManager.squareSize = squareSize;
+
+            this.showCalibStatus('Computing calibration...', 'info');
+            
+            const result = this.calibrationManager.computeCalibration();
+            
+            if (result.success) {
+                this.showCalibStatus(`✓ Calibrated! RMS: ${result.rms.toFixed(3)}`, 'success');
+                this.addLog(`Chessboard calibration complete: ${result.pixelsPerMM.toFixed(3)} px/mm, RMS: ${result.rms.toFixed(3)}`, 'info');
+                
+                // Apply to legacy calibration system
+                this.applyAdvancedCalibration();
+            }
+        } catch (e) {
+            console.error('Chessboard calibration error:', e);
+            this.showCalibStatus('Error: ' + e.message, 'error');
+        }
+    }
+
+    // Clear chessboard images
+    clearChessboardImages() {
+        if (!this.calibrationManager) return;
+
+        this.calibrationManager.clearChessboardData();
+        
+        const countEl = this.getElement(ELEMENT_IDS.CHESS_IMAGE_COUNT);
+        if (countEl) countEl.textContent = '0';
+        
+        const computeBtn = this.getElement(ELEMENT_IDS.COMPUTE_CHESS_CALIB);
+        if (computeBtn) computeBtn.disabled = true;
+
+        this.showCalibStatus('Images cleared', 'info');
+        this.addLog('Chessboard images cleared', 'info');
+    }
+
+    // Apply advanced calibration to legacy system
+    applyAdvancedCalibration() {
+        if (!this.calibrationManager || !this.calibrationManager.pixelsPerMM) return;
+
+        const pixelsPerMM = this.calibrationManager.pixelsPerMM;
+        
+        // Update legacy calibration table
+        for (let x = 0; x <= this.dm; x += this.pixelBase) {
+            this.cal[x] = pixelsPerMM;
+        }
+
+        this.addLog(`Applied calibration: ${pixelsPerMM.toFixed(3)} px/mm`, 'info');
+    }
+
+    // Show calibration status message
+    showCalibStatus(message, type = 'info') {
+        const statusEl = this.getElement(ELEMENT_IDS.CALIB_STATUS);
+        if (!statusEl) return;
+
+        statusEl.textContent = message;
+        statusEl.className = `calib-status ${type}`;
+
+        // Auto-hide success/info messages after 5 seconds
+        if (type === 'success' || type === 'info') {
+            setTimeout(() => {
+                if (statusEl.textContent === message) {
+                    statusEl.className = 'calib-status';
+                }
+            }, 5000);
+        }
+    }

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chessboard Pattern Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .info,
+        .warning {
+            border-left: 3px solid #666;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #f0f0f0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left-color: #856404;
+        }
+
+        .info h3,
+        .warning h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .pattern-preview {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            overflow: auto;
+        }
+
+        #chessboardCanvas {
+            border: 1px solid #000;
+            background: white;
+            max-width: 100%;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button,
+        .btn-link {
+            padding: 10px 20px;
+            font-size: 14px;
+            border: 1px solid #666;
+            background: white;
+            cursor: pointer;
+        }
+
+        button:hover,
+        .btn-link:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #000;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                border: none;
+                padding: 0;
+            }
+
+            .controls,
+            .buttons,
+            .info,
+            .warning,
+            .stats,
+            h1,
+            .subtitle {
+                display: none;
+            }
+
+            .pattern-preview {
+                border: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Chessboard Pattern Generator</h1>
+        <p class="subtitle">Generate printable chessboard patterns for camera calibration</p>
+
+        <div class="info">
+            <h3>Instructions</h3>
+            <p>
+                1. Set square size (measure after printing)<br>
+                2. Choose pattern size (9x6 recommended)<br>
+                3. Download or print the pattern<br>
+                4. Mount on FLAT, RIGID surface (foam board recommended)<br>
+                5. In CamRuler, show pattern from 5-10 different angles<br>
+                6. Compute calibration for lens distortion correction
+            </p>
+        </div>
+
+        <div class="warning">
+            <h3>Important</h3>
+            <p>
+                The pattern MUST be perfectly flat! Any warping will ruin calibration.<br>
+                Measure the actual square size after printing - printers may scale slightly.
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="squareSize">Square Size (mm):</label>
+                <input type="number" id="squareSize" value="25" min="5" max="100" step="1">
+            </div>
+
+            <div class="control-group">
+                <label for="patternSize">Pattern Size:</label>
+                <select id="patternSize">
+                    <option value="9x6" selected>9x6 (recommended)</option>
+                    <option value="7x5">7x5 (smaller)</option>
+                    <option value="10x7">10x7 (larger)</option>
+                    <option value="8x6">8x6 (standard)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="marginSize">Margin (mm):</label>
+                <input type="number" id="marginSize" value="20" min="0" max="50" step="5">
+            </div>
+
+            <div class="control-group">
+                <label for="showLabels">Show Labels:</label>
+                <select id="showLabels">
+                    <option value="true" selected>Yes</option>
+                    <option value="false">No (for printing)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Internal Corners</div>
+                <div class="stat-value" id="cornersCount">48</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Size</div>
+                <div class="stat-value" id="totalSize">225mm</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Pattern</div>
+                <div class="stat-value" id="patternDisplay">9x6</div>
+            </div>
+        </div>
+
+        <div class="pattern-preview">
+            <canvas id="chessboardCanvas"></canvas>
+        </div>
+
+        <div class="buttons">
+            <button onclick="downloadPattern()">Download PNG</button>
+            <button onclick="window.print()">Print</button>
+            <a href="index.html" class="btn-link">Back to CamRuler</a>
+        </div>
+    </div>
+
+    <script>
+        function generateChessboard() {
+            const squareSize = parseInt(document.getElementById('squareSize').value);
+            const patternSize = document.getElementById('patternSize').value;
+            const marginSize = parseInt(document.getElementById('marginSize').value);
+            const showLabels = document.getElementById('showLabels').value === 'true';
+
+            const [cols, rows] = patternSize.split('x').map(Number);
+
+            const pixelsPerMM = 3;
+            const squarePx = squareSize * pixelsPerMM;
+            const marginPx = marginSize * pixelsPerMM;
+            const canvasWidth = (cols * squarePx) + (2 * marginPx);
+            const canvasHeight = (rows * squarePx) + (2 * marginPx);
+
+            const internalCorners = (cols - 1) * (rows - 1);
+            const totalSizeMM = Math.max(cols * squareSize, rows * squareSize) + (2 * marginSize);
+            document.getElementById('cornersCount').textContent = internalCorners;
+            document.getElementById('totalSize').textContent = totalSizeMM + 'mm';
+            document.getElementById('patternDisplay').textContent = patternSize;
+
+            const canvas = document.getElementById('chessboardCanvas');
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const isBlack = (row + col) % 2 === 0;
+                    ctx.fillStyle = isBlack ? 'black' : 'white';
+
+                    const x = marginPx + (col * squarePx);
+                    const y = marginPx + (row * squarePx);
+
+                    ctx.fillRect(x, y, squarePx, squarePx);
+                }
+            }
+
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(marginPx, marginPx, cols * squarePx, rows * squarePx);
+
+            if (showLabels) {
+                ctx.fillStyle = 'red';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+
+                ctx.fillText(
+                    `Chessboard ${cols}x${rows} | Square: ${squareSize}mm`,
+                    canvasWidth / 2,
+                    marginPx / 2
+                );
+
+                ctx.fillStyle = 'blue';
+                ctx.font = 'bold 14px Arial';
+
+                for (let row = 1; row < rows; row++) {
+                    for (let col = 1; col < cols; col++) {
+                        const x = marginPx + (col * squarePx);
+                        const y = marginPx + (row * squarePx);
+
+                        ctx.beginPath();
+                        ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+
+                ctx.fillStyle = 'black';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Internal corners: ${internalCorners}`, marginPx, canvasHeight - marginPx / 3);
+                ctx.textAlign = 'right';
+                ctx.fillText(`Measure actual size after printing!`, canvasWidth - marginPx, canvasHeight - marginPx / 3);
+            }
+        }
+
+        function downloadPattern() {
+            const canvas = document.getElementById('chessboardCanvas');
+            const squareSize = document.getElementById('squareSize').value;
+            const patternSize = document.getElementById('patternSize').value;
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `chessboard_${patternSize}_${squareSize}mm.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        document.getElementById('squareSize').addEventListener('input', generateChessboard);
+        document.getElementById('patternSize').addEventListener('change', generateChessboard);
+        document.getElementById('marginSize').addEventListener('input', generateChessboard);
+        document.getElementById('showLabels').addEventListener('change', generateChessboard);
+
+        generateChessboard();
+    </script>
+</body>
+
+</html>

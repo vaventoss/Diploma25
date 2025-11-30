@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamRuler - Camera Measurement Tool</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+    <div id="container">
+        <!-- Loading indicator -->
+        <div id="loading" hidden>
+            <div>Loading OpenCV.js...</div>
+            <div>Please wait...</div>
+        </div>
+
+        <!-- Start controls -->
+        <div class="start-controls">
+            <div class="start-column">
+                <button id="startBtn">Start Camera</button>
+            </div>
+        </div>
+
+        <!-- Control panel -->
+        <div id="controls" class="control-panel" aria-label="Controls">
+            <button type="button" data-action="quit" title="Quit (Q)">Quit</button>
+            <button type="button" data-action="config" title="Config (C)">Config</button>
+            <button type="button" data-action="norms" title="Normalize (N)">Normalize</button>
+            <button type="button" data-action="rotate" title="Rotate (R)">Rotate</button>
+            <button type="button" data-action="auto" title="Auto (A)">Auto</button>
+            <button type="button" id="footerToggle" title="Toggle footer">Toggle Footer</button>
+            <button type="button" id="debugToggle" title="Toggle debug logs">Debug</button>
+            <button type="button" id="binaryToggle" title="Toggle binary view">Binary: OFF</button>
+            <button type="button" id="shadowToggle" title="Toggle shadow removal">Shadow Removal: OFF</button>
+        </div>
+
+        <!-- Footer with camera controls, save settings, and logs -->
+        <footer id="appFooter">
+            <!-- Gallery link -->
+            <div class="footer-links">
+                <button id="openDetail" title="Open detail page">
+                    Informatsiya pro vymiryanyi obiekt
+                </button>
+            </div>
+
+            <!-- Camera selection -->
+            <div class="footer-camera">
+                <label for="cameraSelect">Camera:</label>
+                <select id="cameraSelect" aria-label="Select camera">
+                    <option value="">Default camera</option>
+                </select>
+                <button id="cameraRefresh" title="Refresh camera list">⟳</button>
+                <button id="cameraRequest" title="Request camera permission">Allow</button>
+            </div>
+
+            <!-- Calibration controls -->
+            <div class="calibration-controls">
+                <label for="calibrationFile">Load Calibration:</label>
+                <input type="file" id="calibrationFile" accept=".json" aria-label="Load calibration file" />
+                <button id="calibrationLoadBtn" title="Load calibration from file">
+                    Load
+                </button>
+                <span id="calibrationStatus" class="calibration-status">
+                    (default: 10 px/mm)
+                </span>
+                <span id="calibrationModeIndicator" class="calibration-mode-indicator">Mode: Manual</span>
+                <button id="switchToJsonBtn" class="hidden-btn" title="Switch to JSON calibration">
+                    Use JSON
+                </button>
+                <button id="switchToManualBtn" class="hidden-btn" title="Switch to manual calibration">
+                    Use Manual
+                </button>
+            </div>
+
+            <!-- Save controls -->
+            <div class="save-controls">
+                <label>
+                    <input type="checkbox" id="autoSave" />
+                    Auto-save detections
+                </label>
+                <button id="chooseFolder" title="Choose save folder">
+                    Choose Folder
+                </button>
+                <label class="object-name-label">
+                    Object name:
+                    <input id="objectName" type="text" placeholder="Enter object name (manual)" />
+                </label>
+                <button id="exportCsvBtn" title="Export all CSVs">
+                    Export All CSV
+                </button>
+                <span id="saveFolderLabel" class="save-folder-label">
+                    (no folder)
+                </span>
+            </div>
+
+
+
+    <!-- Log panel -->
+    <div class="log-panel">
+        <div class="log-header">
+            <span>Logs</span>
+            <div class="log-controls">
+                <button id="logToggle" title="Toggle logs">▾</button>
+                <button id="logClear" title="Clear logs">Clear</button>
+                <button id="logDownload" title="Download logs">Download</button>
+            </div>
+        </div>
+        <div id="logBody" class="log-body"></div>
+    </div>
+    </footer>
+
+    <!-- Video and canvas elements -->
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div id="info"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="logger.js" defer></script>
+    <script src="csvstore.js" defer></script>
+    <script src="calibration.js" defer></script>
+    <script src="shadowremoval.js" defer></script>
+    <script src="menu.js" defer></script>
+    <script src="camruler.js" defer></script>
+    <script src="gallery.js" defer></script>
+    <script src="boot.js" defer></script>
+    <script async src="https://docs.opencv.org/5.x/opencv.js" onload="onOpenCvReady();"
+        type="text/javascript"></script>
+</body>
+
+</html>
