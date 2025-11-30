@@ -21,12 +21,12 @@ const HISTOGRAM_CONFIG = {
 
 const IMAGE_EXTENSIONS_REGEX = /\.(jpe?g|png|gif)$/i;
 
-// Helper: Get element by ID
+ 
 function getElement(id) {
     return document.getElementById(id);
 }
 
-// Wire up DOM on load
+ 
 document.addEventListener('DOMContentLoaded', () => {
     const chooseBtn = getElement(GALLERY_ELEMENT_IDS.CHOOSE_LOCAL_FOLDER);
     const folderLabel = getElement(GALLERY_ELEMENT_IDS.LOCAL_FOLDER_LABEL);
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Handle folder selection
+ 
 async function handleFolderSelection(folderLabel, fileSelect) {
     try {
         if (!window.showDirectoryPicker) {
@@ -66,7 +66,7 @@ async function handleFolderSelection(folderLabel, fileSelect) {
     }
 }
 
-// Handle file load from local folder
+ 
 async function handleFileLoad(fileSelect) {
     if (!window._camrulerSelectedDir) {
         alert('No folder chosen');
@@ -98,7 +98,7 @@ async function handleFileLoad(fileSelect) {
     }
 }
 
-// Load image element and process
+ 
 function loadImageElement(src, targets, requestedFile, revokeUrl) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -132,7 +132,7 @@ function loadImageElement(src, targets, requestedFile, revokeUrl) {
     };
 }
 
-// Process image with OpenCV
+ 
 function performGalleryProcessing(img, targets) {
     try {
         const { origCanvas, grayCanvas, threshCanvas, invCanvas, histCanvas, infoEl } = targets;
@@ -194,7 +194,7 @@ function performGalleryProcessing(img, targets) {
     }
 }
 
-// Create histogram visualization
+ 
 function createHistogram(grayMat, canvas) {
     const hist = new cv.Mat();
     const mask = new cv.Mat();

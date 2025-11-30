@@ -1,4 +1,4 @@
-// Константи
+
 const ELEMENT_IDS = {
     VIDEO: 'video',
     CANVAS: 'canvas',
@@ -87,46 +87,34 @@ const KEY_CODE_MAP = {
 
 class CamRuler {
     constructor() {
-        // DOM-елементи
         this.video = document.getElementById(ELEMENT_IDS.VIDEO);
         this.canvas = document.getElementById(ELEMENT_IDS.CANVAS);
         this.ctx = this.canvas.getContext('2d');
         this.info = document.getElementById(ELEMENT_IDS.INFO);
 
-        // Розміри відео
         this.width = DEFAULT_CONFIG.WIDTH;
         this.height = DEFAULT_CONFIG.HEIGHT;
         this.stream = null;
         this.animationId = null;
 
-        // Матриці OpenCV
         this.src = null;
         this.dst = null;
         this.gray = null;
-        this.blurred = null;
         this.thresh = null;
 
-        // Налаштування калібрування
         this.pixelBase = DEFAULT_CONFIG.PIXEL_BASE;
         this.calRange = DEFAULT_CONFIG.CAL_RANGE;
         this.calBase = DEFAULT_CONFIG.CAL_BASE;
-        this.calLast = null;
         this.cal = {};
         this.unitSuffix = DEFAULT_CONFIG.UNIT_SUFFIX;
-        this.calibrationMode = 'manual'; // 'manual' or 'json' - which calibration is active
-        this.manualCalibration = {}; // Store manual calibration separately
+        this.calibrationMode = 'manual';
+        this.manualCalibration = {};
 
-        // Стан миші
-        this.mouseRaw = { x: 0, y: 0 };
-        this.mouseNow = { x: 0, y: 0 };
         this.mouseMark = null;
-        this.rightMouseDown = false;
 
-        // Прапорці режимів
         this.keyFlags = {
             config: false,
             auto: false,
-            thresh: false,
             percent: false,
             norms: false,
             rotate: false,
@@ -134,40 +122,28 @@ class CamRuler {
             circleMode: false
         };
 
-        // Налаштування авто-режиму
         this.autoPercent = DEFAULT_CONFIG.AUTO_PERCENT;
         this.autoThreshold = DEFAULT_CONFIG.AUTO_THRESHOLD;
         this.autoBlur = DEFAULT_CONFIG.AUTO_BLUR;
-
-        // Налаштування нормалізації
         this.normAlpha = DEFAULT_CONFIG.NORM_ALPHA;
         this.normBeta = DEFAULT_CONFIG.NORM_BETA;
 
-        // Кольорова схема
         this.colors = COLOR_PALETTE;
         this.autoColors = AUTO_COLOR_SEQUENCE;
 
-        // Центр та розміри canvas
         this.cx = 0;
         this.cy = 0;
         this.dm = 0;
-        this.area = 0;
 
-        // Логування (делеговано модулю Logger)
         this.logBuffer = [];
         this.maxLogs = DEFAULT_CONFIG.MAX_LOGS;
         this.logEl = null;
-        this.logVisible = false;
         this.binaryMode = false;
         this.shadowRemovalMode = false;
 
-        // Налаштування автозбереження
         this.autoSave = false;
         this.saveDirHandle = null;
 
-        this.setupEventListeners();
-        
-        // Ініціалізація зовнішніх модулів
         try {
             if (window?.Menu) {
                 this.menu = new window.Menu(this);
@@ -180,12 +156,10 @@ class CamRuler {
         }
     }
 
-    // Допоміжна функція: отримати елемент за ID
     getElement(id) {
         return document.getElementById(id);
     }
 
-    // Налаштування обробників подій
     setupEventListeners() {
         this.setupCameraControls();
         this.setupCanvasInteraction();
@@ -197,7 +171,6 @@ class CamRuler {
         this.setupCalibrationControls();
     }
 
-    // Налаштування керування камерою
     setupCameraControls() {
         const startBtn = this.getElement(ELEMENT_IDS.START_BTN);
         if (startBtn) {
@@ -236,7 +209,6 @@ class CamRuler {
         this.populateCameraList();
     }
 
-    // Налаштування взаємодії з canvas
     setupCanvasInteraction() {
         this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         this.canvas.addEventListener('click', (e) => this.handleMouseClick(e));
@@ -249,7 +221,6 @@ class CamRuler {
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
     }
 
-    // Налаштування кнопок керування
     setupControlButtons() {
         const controlButtons = document.querySelectorAll('#controls button[data-action]');
         if (controlButtons?.forEach) {
@@ -257,7 +228,6 @@ class CamRuler {
                 btn.addEventListener('click', () => {
                     const action = btn.dataset.action;
 
-                    // Спроба делегувати в модуль Menu
                     try {
                         if (this.menu?.handleControlAction) {
                             this.menu.handleControlAction(action);
@@ -268,7 +238,6 @@ class CamRuler {
                         console.warn('Control action failed:', e);
                     }
 
-                    // Синтез події клавіатури для сумісності
                     try {
                         const key = ACTION_TO_KEY_MAP[action];
                         if (key) {
@@ -293,7 +262,6 @@ class CamRuler {
         this.updateControlUI();
     }
 
-    // Налаштування логування
     setupLogging() {
         this.logEl = this.getElement(ELEMENT_IDS.LOG_BODY);
         const logToggle = this.getElement(ELEMENT_IDS.LOG_TOGGLE);
@@ -317,7 +285,6 @@ class CamRuler {
         }
     }
 
-    // Налаштування елементів збереження
     setupSaveControls() {
         const autoSaveCheckbox = this.getElement(ELEMENT_IDS.AUTO_SAVE);
         const chooseFolderBtn = this.getElement(ELEMENT_IDS.CHOOSE_FOLDER);
@@ -363,7 +330,6 @@ class CamRuler {
 
             const handle = await window.showDirectoryPicker();
 
-            // Try to create/access imgs subdirectory
             try {
                 const imgsHandle = await handle.getDirectoryHandle('imgs', { create: true });
                 this.saveDirHandle = imgsHandle;
@@ -375,7 +341,6 @@ class CamRuler {
                     saveFolderLabel.textContent = 'imgs (chosen dir)';
                 }
             } catch (e) {
-                // Fallback to root directory
                 this.saveDirHandle = handle;
                 if (window.CSVStore) {
                     window.CSVStore.saveDirHandle = handle;
@@ -393,7 +358,6 @@ class CamRuler {
         }
     }
 
-    // Налаштування футера
     setupFooterControls() {
         const footerEl = this.getElement(ELEMENT_IDS.APP_FOOTER);
         const footerToggle = this.getElement(ELEMENT_IDS.FOOTER_TOGGLE);

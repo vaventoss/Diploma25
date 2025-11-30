@@ -11,20 +11,15 @@
 
 <body>
     <div id="container">
-        <!-- Loading indicator -->
         <div id="loading" hidden>
             <div>Loading OpenCV.js...</div>
             <div>Please wait...</div>
         </div>
-
-        <!-- Start controls -->
         <div class="start-controls">
             <div class="start-column">
                 <button id="startBtn">Start Camera</button>
             </div>
         </div>
-
-        <!-- Control panel -->
         <div id="controls" class="control-panel" aria-label="Controls">
             <button type="button" data-action="quit" title="Stop">Stop</button>
             <button type="button" data-action="config" title="Calibrate">Calibrate</button>
@@ -117,8 +112,6 @@
     <canvas id="canvas"></canvas>
     <div id="info"></div>
     </div>
-
-    <!-- Scripts -->
     <script src="logger.js" defer></script>
     <script src="csvstore.js" defer></script>
     <script src="calibration.js" defer></script>

@@ -10,14 +10,14 @@
             this.updateControlUI();
         }
 
-        // Допоміжна: логування у Logger, якщо доступно
+        
         log(message, level = 'debug') {
             if (window?.Logger?.add) {
                 window.Logger.add(message, level);
             }
         }
 
-        // Прив'язати кнопки керування
+        
         bindControls() {
             const controlButtons = document.querySelectorAll(SELECTORS.CONTROL_BUTTONS);
 
@@ -31,7 +31,7 @@
             }
         }
 
-        // Обробити дію керування
+        
         handleControlAction(action) {
             const cam = this.cam;
             this.log(`МЕНЮ дія: ${action}`, 'debug');
@@ -100,7 +100,7 @@
             this.log(`МЕНЮ стан: ${JSON.stringify(cam.keyFlags)}`, 'debug');
         }
 
-        // Оновити UI керування
+        
         updateControlUI() {
             const cam = this.cam;
             const btns = document.querySelectorAll(SELECTORS.CONTROL_BUTTONS);

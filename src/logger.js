@@ -24,7 +24,7 @@
             this.debugEnabled = false;
         }
 
-        // Допоміжна: отримати елемент за ID
+        
         getElement(id) {
             return document.getElementById(id);
         }
@@ -87,7 +87,7 @@
         }
 
         add(message, level = 'info') {
-            // Пропускати debug-повідомлення, якщо debug вимкнено
+            
             if (level === 'debug' && !this.debugEnabled) {
                 return;
             }
@@ -95,13 +95,13 @@
             const ts = new Date().toISOString();
             const line = `[${ts}] ${message}`;
 
-            // Додати до буфера
+            
             this.logBuffer.push({ ts, message, level });
             if (this.logBuffer.length > this.maxLogs) {
                 this.logBuffer.shift();
             }
 
-            // Вивід у консоль
+            
             if (level === 'error') {
                 console.error(line);
             } else if (level === 'warn') {
@@ -110,7 +110,7 @@
                 console.log(line);
             }
 
-            // Вивід у DOM
+            
             if (this.logEl && this.logVisible) {
                 const div = document.createElement('div');
                 div.className = `log-line log-level-${level}`;
@@ -139,7 +139,7 @@
             }
         }
 
-        // Показати/сховати лог
+        
         toggle() {
             this.logVisible = !this.logVisible;
 
@@ -166,7 +166,7 @@
             }
         }
 
-        // Очистити лог
+        
         clear() {
             this.logBuffer = [];
 
@@ -175,7 +175,7 @@
             }
         }
 
-        // Завантажити лог
+        
         download() {
             const lines = this.logBuffer.map(l => `[${l.ts}] [${l.level.toUpperCase()}] ${l.message}`);
             const content = lines.join('\n');

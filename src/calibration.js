@@ -1,7 +1,4 @@
-/**
- * Calibration Module
- * Handles loading and using camera calibration data
- */
+    
 
 class CalibrationManager {
     constructor() {
@@ -12,11 +9,7 @@ class CalibrationManager {
         this.ELEMENT_ID = 'calibrationLoadBtn';
     }
 
-    /**
-     * Load calibration data from JSON file
-     * @param {File} file - Calibration JSON file
-     * @returns {Promise<boolean>} Success status
-     */
+    
     async loadFromFile(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -53,21 +46,20 @@ class CalibrationManager {
         });
     }
 
-    /**
-     * Parse calibration JSON and extract useful values
-     * @param {Object} data - Calibration data object
-     */
+        
     parseCalibrationData(data) {
         this.calibrationData = data;
 
-        // Extract pixels per mm
+        
         if (data.estimated_pixels_per_mm) {
             this.pixelsPerMm = data.estimated_pixels_per_mm;
             console.log('Using estimated_pixels_per_mm from JSON:', this.pixelsPerMm);
         } else if (data.camera_matrix && Array.isArray(data.camera_matrix)) {
             // Calculate from camera matrix (focal length)
+            
             this.focalLength = data.camera_matrix[0][0]; // fx
             // Estimate pixels per mm from focal length and square size
+            
             this.pixelsPerMm = this.focalLength / (data.square_size_mm || 12);
             console.log('Calculated pixels per mm from camera_matrix:', this.pixelsPerMm);
         } else {
@@ -78,11 +70,7 @@ class CalibrationManager {
         console.log('Calibration parsed, isLoaded:', this.isLoaded, 'pixelsPerMm:', this.pixelsPerMm);
     }
 
-    /**
-     * Convert pixel distance to millimeters using calibration
-     * @param {number} pixelDistance - Distance in pixels
-     * @returns {number} Distance in millimeters
-     */
+    
     pixelsToMillimeters(pixelDistance) {
         if (!this.isLoaded || !this.pixelsPerMm) {
             return null;
@@ -90,11 +78,7 @@ class CalibrationManager {
         return pixelDistance / this.pixelsPerMm;
     }
 
-    /**
-     * Convert millimeters to pixels using calibration
-     * @param {number} mmDistance - Distance in millimeters
-     * @returns {number} Distance in pixels
-     */
+    
     millimetersToPixels(mmDistance) {
         if (!this.isLoaded || !this.pixelsPerMm) {
             return null;
@@ -102,10 +86,7 @@ class CalibrationManager {
         return mmDistance * this.pixelsPerMm;
     }
 
-    /**
-     * Get calibration info for display
-     * @returns {Object} Calibration info
-     */
+    
     getInfo() {
         if (!this.isLoaded) {
             return {
@@ -128,9 +109,7 @@ class CalibrationManager {
         return info;
     }
 
-    /**
-     * Clear loaded calibration
-     */
+
     clear() {
         this.calibrationData = null;
         this.pixelsPerMm = null;
@@ -138,10 +117,7 @@ class CalibrationManager {
         this.isLoaded = false;
     }
 
-    /**
-     * Get status string for display
-     * @returns {string} Status message
-     */
+    
     getStatus() {
         if (!this.isLoaded) {
             return 'Calibration: Not loaded (using default)';
@@ -150,5 +126,4 @@ class CalibrationManager {
     }
 }
 
-// Create global instance
 window.CalibrationManager = new CalibrationManager();

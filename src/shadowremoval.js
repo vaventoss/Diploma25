@@ -1,12 +1,12 @@
 (function () {
     const SHADOW_CONFIG = {
-        // Межа обрізки CLAHE
+        
         CLAHE_CLIP_LIMIT: 3.0,
         
-        // Розмір сітки плитки CLAHE
+        
         CLAHE_TILE_SIZE: 8,
         
-        // Резерв: розмір гаусового розмиття
+        
         BLUR_SIZE: 45
     };
 
@@ -18,15 +18,15 @@
         }
 
         initializeMats(width, height) {
-            // Постійні матриці не потрібні
+            
         }
 
         cleanupMats() {
-            // Постійні матриці не потрібно очищати
+            
         }
 
         /**
-         * Видалення тіней — спочатку пробує CLAHE, потім гомоморфний фільтр
+         
          */
         removeShadows(src, dst) {
             if (!this.enabled || !src || !dst) {
@@ -38,14 +38,14 @@
 
             this.frameCount++;
             
-            // Перевірити доступність OpenCV
+            
             if (typeof cv === 'undefined') {
                 console.error('OpenCV not available!');
                 this.enabled = false;
                 return;
             }
 
-            // Спочатку CLAHE, якщо недоступно — гомоморфний фільтр
+            
             const useCLAHE = typeof cv.CLAHE !== 'undefined';
             
             if (this.frameCount === 1) {
@@ -60,7 +60,7 @@
         }
 
         /**
-         * Видалення тіней на основі CLAHE
+         
          */
         removeShadowsCLAHE(src, dst) {
             let rgb = null;

@@ -7,7 +7,7 @@
 
     class JSONStore {
         constructor() {
-            this.measurements = []; // Масив для зберігання всіх вимірювань
+            this.measurements = [];
             this.jsonFlushTimer = null;
             this.saveDirHandle = null;
             this.unitSuffix = DEFAULT_CONFIG.UNIT_SUFFIX;
@@ -28,7 +28,7 @@
 
         saveMeasurement(objectName, mode, xlen, ylen, diagonal, area, percent, shapeType = null) {
             try {
-                // Визначити тип форми з режиму, якщо явно не вказано
+                
                 let finalShapeType = shapeType;
                 if (!finalShapeType) {
                     if (mode.includes('circle') || mode === 'manual_circle') {
@@ -104,26 +104,26 @@
                     }
                 }
 
-                // Додати нові вимірювання до існуючих даних
+                
                 existingData.push(...this.measurements);
                 
-                // Записати назад у файл
+                
                 const content = JSON.stringify(existingData, null, 2);
 
-                // Перевірити, чи є handle директорії для збереження
+                
                 if (!this.saveDirHandle) {
-                    // Не завантажувати автоматично, попередити користувача
+                    
                     if (window.Logger) {
                         window.Logger.add(
                             `JSON data ready (${this.measurements.length} measurements) - Please select save folder (Choose Folder button) or Export JSON to save`,
                             'warn'
                         );
                     }
-                    // Зберегти вимірювання для подальшого збереження
+                    
                     return;
                 }
 
-                // Спробувати зберегти через File System Access API
+                
                 if (this.saveDirHandle?.getFileHandle) {
                     try {
                         const fh = await this.saveDirHandle.getFileHandle(filename, { create: true });
@@ -135,7 +135,7 @@
                             window.Logger.add(`JSON saved to folder: ${filename} (${existingData.length} total measurements)`);
                         }
 
-                        // Очистити лише ті вимірювання, які щойно збережено
+                        
                         this.measurements = [];
                         return;
                     } catch (e) {
@@ -148,7 +148,7 @@
                     }
                 }
 
-                // Якщо дійшли сюди — папку вибрано, але запис не вдався
+                
                 if (window.Logger) {
                     window.Logger.add(
                         `Could not save JSON - check folder permissions`,
@@ -190,10 +190,10 @@
                     console.warn('Error flushing buffer during export:', e);
                 }
 
-                // Якщо у буфері ще є вимірювання, включити їх
+                
                 let allMeasurements = [...this.measurements];
                 
-                // Якщо вимірювань немає, попередити користувача
+                
                 if (allMeasurements.length === 0 && !this.saveDirHandle) {
                     if (window.Logger) {
                         window.Logger.add('No measurements to export. Make some measurements first or select a folder.', 'warn');
