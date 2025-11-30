@@ -222,29 +222,40 @@
 
                 if (this.saveDirHandle?.getFileHandle) {
                     const filename = DEFAULT_CONFIG.JSON_FILENAME;
+                    let fileExists = false;
+                    let fileContent = '';
                     try {
+                        // Пробуем открыть файл, если он есть
                         const fh = await this.saveDirHandle.getFileHandle(filename, { create: false });
                         const file = await fh.getFile();
-                        const text = await file.text();
-                        if (text.trim()) {
-                            try {
-                                const existingData = JSON.parse(text);
-                                if (Array.isArray(existingData)) {
-                                    allMeasurements = [...existingData, ...allMeasurements];
-                                }
-                            } catch (parseErr) {
-                                if (window.Logger) {
-                                    window.Logger.add('Warning: existing file is invalid JSON, will overwrite', 'warn');
-                                }
-                            }
-                        }
+                        fileContent = await file.text();
+                        fileExists = true;
                     } catch (e) {
+                        // Файл не найден или ошибка доступа
+                        fileExists = false;
+                        fileContent = '';
+                        if (window.Logger) window.Logger.add('No existing measurements.json, will create new.', 'info');
+                        console.warn('No existing measurements.json, will create new.', e);
+                    }
 
+                    if (fileContent.trim()) {
+                        try {
+                            const existingData = JSON.parse(fileContent);
+                            if (Array.isArray(existingData)) {
+                                allMeasurements = [...existingData, ...allMeasurements];
+                            }
+                        } catch (parseErr) {
+                            if (window.Logger) {
+                                window.Logger.add('Warning: existing file is invalid JSON, will overwrite', 'warn');
+                            }
+                            console.warn('Invalid JSON in measurements.json, will overwrite.', parseErr);
+                        }
                     }
 
                     if (allMeasurements.length > 0) {
                         const content = JSON.stringify(allMeasurements, null, 2);
                         try {
+                            // Всегда создаём файл, если его не было
                             const fh = await this.saveDirHandle.getFileHandle(filename, { create: true });
                             const writable = await fh.createWritable({ keepExistingData: false });
                             await writable.write(content);
@@ -260,9 +271,10 @@
                             if (window.Logger) {
                                 window.Logger.add(
                                     'Failed to write JSON to folder: ' + (e?.message || e),
-                                    'warn'
+                                    'error'
                                 );
                             }
+                            console.error('Failed to write JSON to folder:', e);
                         }
                     }
                 }

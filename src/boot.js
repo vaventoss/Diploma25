@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('video') && window.CamRuler) {
         try {
             window.app = new window.CamRuler();
+            window.app.setupEventListeners();
             const startBtn = document.getElementById('startBtn');
             if (startBtn) startBtn.disabled = !cvReady;
         } catch (e) {
